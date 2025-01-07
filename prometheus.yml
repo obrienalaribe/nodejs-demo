@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "app"
+    static_configs:
+      - targets: ["app:3000"] # Scraping metrics from the Node.js app
+
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"] # Prometheus's own metrics
