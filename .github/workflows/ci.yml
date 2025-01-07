@@ -82,7 +82,7 @@ jobs:
         git push origin $NEW_TAG
 
     - name: Output the new tag
-      run: echo "Created new tag: ${{ env.tag }}"
+      run: echo Created new tag: ${{ env.tag }}
     
   #   - name: Setup upterm session
   #     uses: lhotari/action-upterm@v1
