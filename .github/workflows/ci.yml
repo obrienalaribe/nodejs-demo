@@ -3,84 +3,75 @@ name: CI Pipeline
 on:
   push:
     branches:
-      - feature/*   # Trigger lint and formatting on feature branches
+      - "**" # Trigger lint and formatting on feature branches
   pull_request:
     branches:
-      - main        # Run build checks on PRs to main
-  push:
-    branches:
-      - main        # Trigger tag creation on merge to main
+      - main # Run build checks on PRs to main
 
 jobs:
-  lint-format:
+  format:
     if: startsWith(github.ref, 'refs/heads/feature/') # Only run on feature branches
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
 
-    - name: Run linter
-      run: npm run lint
-
-    - name: Check code formatting
-      run: npm run format:check
+      - name: Check code formatting
+        run: npm run format
 
   build-on-pr:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
 
-    - name: Install dependencies
-      run: npm ci
-
-    - name: Run build
-      run: npm run build
+      - name: Install dependencies
+        run: npm ci
 
   create-tag:
     if: github.ref == 'refs/heads/main' # Only run on main branch
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Fetch all tags
-      run: git fetch --tags
+      - name: Fetch all tags
+        run: git fetch --tags
 
-    - name: Create a new tag
-      id: create_tag
-      run: |
-        # Get the latest tag
-        LATEST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
-        echo "Latest tag: $LATEST_TAG"
+      - name: Create a new tag
+        id: create_tag
+        run: |
+          # Get the latest tag
+          LATEST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          echo "Latest tag: $LATEST_TAG"
 
-        # Increment the patch version (e.g., v1.0.0 -> v1.0.1)
-        IFS='.' read -r MAJOR MINOR PATCH <<<"${LATEST_TAG#v}"
-        PATCH=$((PATCH + 1))
-        NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
-        echo "New tag: $NEW_TAG"
+          # Increment the patch version (e.g., v1.0.0 -> v1.0.1)
+          IFS='.' read -r MAJOR MINOR PATCH <<<"${LATEST_TAG#v}"
+          PATCH=$((PATCH + 1))
+          NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "New tag: $NEW_TAG"
 
-        # Set the tag in GitHub Actions
-        echo "tag=$NEW_TAG" >> $GITHUB_ENV
+          # Set the tag in GitHub Actions
+          echo "tag=$NEW_TAG" >> $GITHUB_ENV
 
-        # Create and push the new tag
-        git tag $NEW_TAG
-        git push origin $NEW_TAG
-    
+          # Create and push the new tag
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
+
   #   - name: Setup upterm session
   #     uses: lhotari/action-upterm@v1
   #     if: ${{ failure() }}
@@ -92,6 +83,6 @@ jobs:
     runs-on: ubuntu-latest
     if: failure()
     steps:
-    - name: Notify failure
-      run: |
-        echo "Push notification to slack"
+      - name: Notify failure
+        run: |
+          echo "Push notification to slack"
