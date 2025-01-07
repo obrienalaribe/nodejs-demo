@@ -79,7 +79,7 @@ jobs:
   #       wait-timeout-minutes: 2
 
   notify-on-failure:
-    needs: [lint-format, build-on-pr, create-tag]
+    needs: [format, build-on-pr, create-tag]
     runs-on: ubuntu-latest
     if: failure()
     steps:
