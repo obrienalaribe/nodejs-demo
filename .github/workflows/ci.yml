@@ -2,13 +2,13 @@ name: CI Pipeline
 
 on:
   push:
-    branches:
+    branches-ignore:
       - "**" # Trigger lint and formatting on feature branches
   pull_request:
     branches:
       - main # Run build checks on PRs to main
 
-# read 
+# read
 permissions:
   id-token: write
   contents: read
@@ -46,36 +46,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-  create-tag:
-    if: github.ref == 'refs/heads/main' # Only run on main branch
-    runs-on: ubuntu-latest
+      - name: Install dependencies
+        run: npm ci
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Software composition analysis (dependency vulnerability audit)
+        run: npm audit 
 
-      - name: Fetch all tags
-        run: git fetch --tags
+      - name: Static Application Security Testing 
+        run: echo "scan sourcecode for security issues (sonarqube)"
 
-      - name: Create a new tag
-        id: create_tag
-        run: |
-          # Get the latest tag
-          LATEST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
-          echo "Latest tag: $LATEST_TAG"
+      - name: E2E Testing
+        run: echo "run tests"
 
-          # Increment the patch version (e.g., v1.0.0 -> v1.0.1)
-          IFS='.' read -r MAJOR MINOR PATCH <<<"${LATEST_TAG#v}"
-          PATCH=$((PATCH + 1))
-          NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
-          echo "New tag: $NEW_TAG"
+# ready for QA deploy/testing
 
-          # Set the tag in GitHub Actions
-          echo "tag=$NEW_TAG" >> $GITHUB_ENV
-
-          # Create and push the new tag
-          git tag $NEW_TAG
-          git push origin $NEW_TAG
+      #     # Create and push the new tag
+      #     git tag $NEW_TAG
+      #     git push origin $NEW_TAG
 
   #   - name: Setup upterm session
   #     uses: lhotari/action-upterm@v1
@@ -84,7 +71,7 @@ jobs:
   #       wait-timeout-minutes: 2
 
   notify-on-failure:
-    needs: [format, build-on-pr, create-tag]
+    needs: [format, build-on-pr]
     runs-on: ubuntu-latest
     if: failure()
     steps:
