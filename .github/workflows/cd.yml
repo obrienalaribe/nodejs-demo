@@ -32,17 +32,9 @@ jobs:
         env:
           ECR_REPOSITORY: workspace/nodejs-demo # Replace with your ECR repo name
         run: |
-          IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${ECR_REPOSITORY}:${GITHUB_SHA::7}"
+          IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${ECR_REPOSITORY}:v2"
           docker build -t $IMAGE_URI .
           docker push $IMAGE_URI
-
-      - name: Deploy to Amazon ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: task-definition.json # Path to your task definition
-          service: your-service-name # Replace with your ECS service name
-          cluster: your-cluster-name # Replace with your ECS cluster name
-          image: ${{ steps.login-ecr.outputs.registry }}/your-ecr-repo-name:latest
 
       # - name: Log in to Docker Hub
       #   uses: docker/login-action@v2

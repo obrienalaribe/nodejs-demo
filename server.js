@@ -95,7 +95,7 @@ app.get("/data", async (req, res) => {
 
 app.get("/", (req, res) => {
   logger.debug("GET / called");
-  res.status(200).send("Version: v1.0.0");
+  res.status(200).send("Version: v2.0.0");
 });
 
 app.get("/ready", async (req, res) => {
